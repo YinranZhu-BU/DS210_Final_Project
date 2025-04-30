@@ -4,6 +4,7 @@ use std::error::Error;
 use std::path::Path;
 use csv::ReaderBuilder;
 use std::cmp::Ordering;
+// data.rs: Handles reading, cleaning, processing, and calculating metrics from raw lap data, including average stint lengths.
 
 // renaming all the columns we need to use in the project
 #[derive(Debug, Deserialize)]
