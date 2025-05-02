@@ -4,9 +4,11 @@ use std::error::Error;
 use std::path::Path;
 use csv::ReaderBuilder;
 use std::cmp::Ordering;
-// data.rs: Handles reading, cleaning, processing, and calculating metrics from raw lap data, including average stint lengths.
+use crate::model::DegradationModel;
 
+// data.rs: Handles reading, cleaning, processing, and calculating metrics from raw lap data, including average stint lengths.
 // renaming all the columns we need to use in the project
+
 #[derive(Debug, Deserialize)]
 struct RawLapData {
     #[serde(rename = "Driver")] driver: String,
@@ -131,6 +133,46 @@ pub fn calculate_average_stint_lengths(data: &HashMap<String, Vec<ProcessedLapDa
     };
 
     (avg(&medium_stints, 14.0), avg(&hard_stints, 42.0))
+}
+
+/// calculate the accuracy of the model prediction 
+pub fn evaluate_model_accuracy(
+    model: &DegradationModel,
+    data: &HashMap<String, Vec<ProcessedLapData>>,
+) -> (f64, f64) {
+    let mut medium_errors = Vec::new();
+    let mut hard_errors = Vec::new();
+
+    for laps in data.values() {
+        for lap in laps {
+            if lap.is_pit_out_lap || lap.is_pit_in_lap {
+                continue;
+            }
+
+            let predicted = model.predict_degradation(
+                lap.tyre_life,
+                lap.track_temp,
+                &lap.compound,
+            );
+            let error = (predicted - lap.time_delta).abs();
+
+            match lap.compound.as_str() {
+                "MEDIUM" => medium_errors.push(error),
+                "HARD" => hard_errors.push(error),
+                _ => {}
+            }
+        }
+    }
+
+    let avg_error = |errors: &[f64]| {
+        if errors.is_empty() {
+            0.0
+        } else {
+            errors.iter().sum::<f64>() / errors.len() as f64
+        }
+    };
+
+    (avg_error(&medium_errors), avg_error(&hard_errors))
 }
 
 /* 

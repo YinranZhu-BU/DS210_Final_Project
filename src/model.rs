@@ -2,7 +2,6 @@ use crate::data::ProcessedLapData;
 use linfa::prelude::*;
 use linfa_linear::LinearRegression;
 use ndarray::{Array1, Array2};
-
 pub type FittedLinearRegression = linfa_linear::FittedLinearRegression<f64>;
 
 pub struct DegradationModel {

@@ -2,7 +2,7 @@ mod data;
 mod model;
 mod strategy;
 
-use data::{DataProcessor, calculate_average_stint_lengths};
+use data::{DataProcessor, calculate_average_stint_lengths, evaluate_model_accuracy};
 use model::DegradationModel;
 use strategy::StrategySimulator;
 use std::error::Error; 
@@ -39,6 +39,12 @@ fn main() -> Result<(), Box<dyn Error>> {
          return Err("Failed to build any models.".into()); // Return an error if no models are built
     }
 
+    // Evaluate model accuracy
+    let (med_error, hard_error) = evaluate_model_accuracy(&model, &processor.driver_data);
+    println!("\nModel Prediction Accuracy (Mean Absolute Error):");
+    println!("- Medium compound: {:.3} seconds per lap", med_error);
+    println!("- Hard compound: {:.3} seconds per lap", hard_error);
+    
     // Run the strategy simulation using the built models and average stint lengths.
     StrategySimulator::simulate_and_print(&model, avg_med, avg_hard)?; // Use '?' to propagate errors
 
