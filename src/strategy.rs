@@ -17,7 +17,7 @@ impl StrategySimulator {
 
         let avg_med_u32 = avg_med.round() as u32;
         let avg_hard_u32 = avg_hard.round() as u32;
-
+// using saturating_sub to prevent errors. For instances, our model might output a result where the total laps is larger than the 56 laps (total laps). 
         let strategies = vec![
             ("1S (M-H)", { let s1=avg_med_u32; let s2=total_laps.saturating_sub(s1); if s1>0&&s2>0&&s1+s2==total_laps { Some(vec![("MEDIUM",s1),("HARD",s2)])}else{None} }),
             ("1S (H-M)", { let s1=avg_hard_u32; let s2=total_laps.saturating_sub(s1); if s1>0&&s2>0&&s1+s2==total_laps { Some(vec![("HARD",s1),("MEDIUM",s2)])}else{None} }),
@@ -25,7 +25,7 @@ impl StrategySimulator {
             ("2S (M-H-H)", { let s1=avg_med_u32; let rem=total_laps.saturating_sub(s1); let s2=(rem as f64/2.0).round() as u32; let s3=rem.saturating_sub(s2); if s1>0&&s2>0&&s3>0&&s1+s2+s3==total_laps{Some(vec![("MEDIUM",s1),("HARD",s2),("HARD",s3)])}else{None} }),
             ("2S (H-M-M)", { let s1=avg_hard_u32; let rem=total_laps.saturating_sub(s1); let s2=(rem as f64/2.0).round() as u32; let s3=rem.saturating_sub(s2); if s1>0&&s2>0&&s3>0&&s1+s2+s3==total_laps{Some(vec![("HARD",s1),("MEDIUM",s2),("MEDIUM",s3)])}else{None} }),
         ];
-
+// calculating time delta + the average pit-loss (21 seconds). 
         for (name, stints_opt) in strategies {
              if let Some(stints) = stints_opt {
                 let total_laps_strat: u32 = stints.iter().map(|(_, l)| l).sum();

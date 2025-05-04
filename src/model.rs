@@ -8,7 +8,7 @@ pub struct DegradationModel {
     pub hard_model: Option<FittedLinearRegression>,
     pub medium_model: Option<FittedLinearRegression>,
 }
-
+// filter out the pit-in and pit-out laps
 impl DegradationModel {
     pub fn new(laps: &[ProcessedLapData]) -> Self {
         let data: Vec<_> = laps.iter()
